@@ -4,16 +4,25 @@ import javax.swing.JOptionPane;
 
 public class BatailleNavaleUnJoueur {
 
-	private int nb_Touches_max; 
-	//(5 + 4 + 3 + 3 + 2 = 17 = nb touches max sur les bateaux)
 	public final static int NB_COLONNES = 10;
 	public final static int NB_LIGNES = 10;
 
+	/**
+	 * état quand tout le bateau est touché
+	 */
 	public final static char ETAT_COULE = 'C';
 	public final static char ETAT_NON_VISITE = ' ';
 	public final static char ETAT_TOUCHE = 'T';
 	public final static char ETAT_A_L_EAU = 'A';
+	/**
+	 * état quand le dernier bateau est coulé
+	 */
 	public final static char ETAT_FINI = 'F';
+	
+	/*
+	 * (normalement 5 + 4 + 3 + 3 + 2 = 17 = nb touches max sur les bateaux)
+	 */
+	private int nb_Touches_max; 
 
 	private CaseBatailleNavale matrix[][] = 
 			new CaseBatailleNavale[NB_COLONNES][NB_LIGNES];
@@ -24,8 +33,13 @@ public class BatailleNavaleUnJoueur {
 	// quand ça vaudra 17 (NB_TOUCHES_MAX) on aura trouvé tous les bateaux
 
 	public BatailleNavaleUnJoueur() {
-		tabBateaux = Bateau.getTabBateau(); 
 		// si on veut hardcoder le placement des bateaux
+		tabBateaux = Bateau.getTabBateau(); 
+//		placeUnBateau(tabBateaux[0]);
+//		placeUnBateau(tabBateaux[1]);
+//		placeUnBateau(tabBateaux[2]);
+//		placeUnBateau(tabBateaux[3]);
+//		placeUnBateau(tabBateaux[4]);
 		nbTouchesTotales = 0;
 		for (Bateau bateau : tabBateaux) {
 			nb_Touches_max += bateau.getTaille(); // normalement = 17
@@ -36,22 +50,36 @@ public class BatailleNavaleUnJoueur {
 				// -1 pour indiquer une case vide
 			}
 		}
-
-//		placeUnBateau(tabBateaux[0]);
-//		placeUnBateau(tabBateaux[1]);
-//		placeUnBateau(tabBateaux[2]);
-//		placeUnBateau(tabBateaux[3]);
-//		placeUnBateau(tabBateaux[4]);
 	}
+	
+	
 
+	/**
+	 * Cette méthode est appelée dès qu'on a touché un bateau
+	 * On vérifie si le bateau est entièrement touché et dans ce cas
+	 * le bateau est "coulé"
+	 * @param idBateau l'identifiant du bateau
+	 * @return vrai si le bateau est coulé
+	 */
 	public boolean testCoule(int idBateau) {
-		boolean b = (tabBateaux[idBateau].estCoule());
+		Bateau bateau = tabBateaux[idBateau];
+		boolean b = (bateau.estCoule());
 		if (b) {
-			traiteBateauCoule(tabBateaux[idBateau]);
+			for (Coord coord : bateau.getCoordonneesBateau()) {
+				int c = coord.getColonne();
+				int l = coord.getLigne();
+				matrix[c][l].setEtat(BatailleNavaleUnJoueur.ETAT_COULE);
+			}
 		}
 		return (b);
 	}
 
+	/**
+	 * Cette méthode permet de vérifier que l'emplacement où
+	 * on veut mettre le bateau est valide
+	 * @param bateau le bateau que l'on veut placer
+	 * @return vrai si l'emplacement est valide
+	 */
 	public boolean estPlacementValide(Bateau bateau) {
 		int taille = bateau.getTaille();
 		int direction = bateau.getDirection();
@@ -82,15 +110,9 @@ public class BatailleNavaleUnJoueur {
 		}
 	}
 
-	public void traiteBateauCoule(Bateau bateau) {
-
-		for (Coord coord : bateau.getCoordonneesBateau()) {
-			int c = coord.getColonne();
-			int l = coord.getLigne();
-			matrix[c][l].setEtat(BatailleNavaleUnJoueur.ETAT_COULE);
-		}
-	}
-
+	/**
+	 * @return La représentation du jeu avec tous les bateaux visibles
+	 */
 	public String toStringTriche() {
 		String s ="";
 		s += "    1   2   3   4   5   6   7   8   9   10 \n";
@@ -109,6 +131,7 @@ public class BatailleNavaleUnJoueur {
 
 		return s;
 	}
+
 
 	public String toString() {
 		String s ="";
@@ -161,8 +184,8 @@ public class BatailleNavaleUnJoueur {
 	public void setTabBateaux(Bateau[] tabBateaux) {
 		this.tabBateaux = tabBateaux;
 	}
-	
-	
+
+
 
 	public int getNbCoupsTotal() {
 		return nbCoupsTotal;
